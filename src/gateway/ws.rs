@@ -85,7 +85,7 @@ async fn handle_socket(state: Arc<AppState>, socket: WebSocket) -> Result<(), Er
                             );
                             continue;
                         }
-                        broadcast_message_to_channel(&state, &channel_id, &content);
+                        broadcast_message_to_channel(&state, &channel_id, &connection_id, &content);
                     }
                     Ok(_other) => {
                         // Ignore unhandled payloads for now
@@ -188,7 +188,7 @@ mod tests {
         let (tx, mut rx) = mpsc::unbounded_channel();
         state.connections.insert(active_connection, tx);
 
-        broadcast_message_to_channel(&state, &channel_id, "hello");
+        broadcast_message_to_channel(&state, &channel_id, &active_connection, "hello");
 
         let message = rx.recv().await.unwrap();
         match message {
@@ -329,13 +329,15 @@ mod tests {
         match payload {
             GatewayPayload::Dispatch { t, d } => {
                 assert_eq!(t, "MESSAGE_CREATE");
-                assert_eq!(
-                    d,
-                    json!({
-                        "channel_id": channel_id,
-                        "content": "hello world",
-                    })
+                assert_eq!(d.get("channel_id"), Some(&json!(channel_id)));
+                assert_eq!(d.get("content"), Some(&json!("hello world")));
+                assert!(d.get("id").and_then(|value| value.as_str()).is_some());
+                assert!(
+                    d.get("author_connection_id")
+                        .and_then(|value| value.as_str())
+                        .is_some()
                 );
+                assert!(d.get("timestamp").is_none());
             }
             other => panic!("expected dispatch payload, got {:?}", other),
         }

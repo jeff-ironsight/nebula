@@ -49,7 +49,8 @@ impl fmt::Display for ChannelId {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct ConnectionId(pub Uuid);
 
 impl From<Uuid> for ConnectionId {

@@ -1,14 +1,14 @@
 use crate::{
-    protocol::GatewayPayload,
+    protocol::{GatewayPayload, MessageCreateEvent},
     state::AppState,
     types::{ChannelId, ConnectionId},
 };
 use axum::extract::ws::Message;
-use serde_json::json;
 use std::sync::Arc;
 #[cfg(test)]
 use std::sync::atomic::Ordering;
 use tracing::{debug, info, warn};
+use ulid::Ulid;
 
 pub fn subscribe_connection(
     state: &Arc<AppState>,
@@ -32,7 +32,12 @@ pub fn subscribe_connection(
         .insert(channel_id);
 }
 
-pub fn broadcast_message_to_channel(state: &Arc<AppState>, channel_id: &ChannelId, content: &str) {
+pub fn broadcast_message_to_channel(
+    state: &Arc<AppState>,
+    channel_id: &ChannelId,
+    author_connection_id: &ConnectionId,
+    content: &str,
+) {
     let Some(members) = state.channel_members.get(channel_id) else {
         warn!(channel = %channel_id, "broadcast requested for channel with no members");
         return;
@@ -41,14 +46,18 @@ pub fn broadcast_message_to_channel(state: &Arc<AppState>, channel_id: &ChannelI
     let member_ids: Vec<ConnectionId> = members.iter().map(|id| *id).collect();
     drop(members);
 
+    let message = MessageCreateEvent {
+        id: Ulid::new(),
+        channel_id: channel_id.clone(),
+        author_connection_id: *author_connection_id,
+        content: content.to_string(),
+    };
     let payload = GatewayPayload::Dispatch {
         t: "MESSAGE_CREATE".into(),
-        d: json!({
-            "channel_id": channel_id,
-            "content": content,
-        }),
+        d: serde_json::to_value(message).expect("message payload should serialize"),
     };
     let message = Message::Text(serde_json::to_string(&payload).unwrap().into());
+
     #[cfg(test)]
     state.dispatch_counter.fetch_add(1, Ordering::Relaxed);
 

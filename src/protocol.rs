@@ -1,5 +1,6 @@
-use crate::types::{ChannelId, UserId};
+use crate::types::{ChannelId, ConnectionId, UserId};
 use serde::{Deserialize, Serialize};
+use ulid::Ulid;
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "op", content = "d")]
@@ -21,6 +22,14 @@ pub enum GatewayPayload {
         t: String,
         d: serde_json::Value,
     },
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct MessageCreateEvent {
+    pub id: Ulid,
+    pub channel_id: ChannelId,
+    pub author_connection_id: ConnectionId,
+    pub content: String,
 }
 
 #[cfg(test)]
