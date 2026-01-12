@@ -1,4 +1,4 @@
-use crate::types::{ChannelId, ConnectionId, OutboundTx, UserId};
+use crate::types::{ChannelId, ConnectionId, OutboundTx, Token, UserId};
 use dashmap::{DashMap, DashSet};
 #[cfg(test)]
 use std::sync::atomic::AtomicUsize;
@@ -11,6 +11,7 @@ pub struct Session {
 
 pub struct AppState {
     pub connections: DashMap<ConnectionId, OutboundTx>,
+    pub auth_tokens: DashMap<Token, UserId>,
     pub sessions: DashMap<ConnectionId, Session>,
     pub channel_members: DashMap<ChannelId, DashSet<ConnectionId>>,
     pub connection_channels: DashMap<ConnectionId, DashSet<ChannelId>>,
@@ -23,6 +24,7 @@ impl AppState {
     pub fn new() -> Self {
         Self {
             connections: DashMap::new(),
+            auth_tokens: DashMap::new(),
             sessions: DashMap::new(),
             channel_members: DashMap::new(),
             connection_channels: DashMap::new(),

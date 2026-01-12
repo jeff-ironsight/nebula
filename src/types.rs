@@ -70,3 +70,13 @@ impl From<Uuid> for UserId {
 }
 
 pub type OutboundTx = mpsc::UnboundedSender<Message>;
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
+#[serde(transparent)]
+pub struct Token(pub String);
+
+impl Token {
+    pub fn new() -> Self {
+        Self(Uuid::new_v4().to_string())
+    }
+}

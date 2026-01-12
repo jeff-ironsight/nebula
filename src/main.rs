@@ -1,6 +1,7 @@
 mod app;
 mod gateway;
 mod protocol;
+mod rest;
 mod settings;
 mod state;
 mod types;
