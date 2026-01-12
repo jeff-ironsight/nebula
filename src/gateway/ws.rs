@@ -579,6 +579,8 @@ mod tests {
             .await
             .unwrap();
 
+        expect_error_dispatch(&mut alice, ErrorCode::NotSubscribed).await;
+
         alice.close(None).await.unwrap();
         bob.close(None).await.unwrap();
         timeout(Duration::from_secs(1), async {
