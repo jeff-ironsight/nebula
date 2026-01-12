@@ -41,6 +41,7 @@ pub async fn ws_handler(
 
 async fn handle_socket(state: Arc<AppState>, socket: WebSocket) -> Result<(), Error> {
     const ERROR_NOT_IDENTIFIED: &str = "NOT_IDENTIFIED";
+    const ERROR_NOT_SUBSCRIBED: &str = "NOT_SUBSCRIBED";
 
     let connection_id = ConnectionId::from(Uuid::new_v4());
     info!(?connection_id, "ws connected");
@@ -109,6 +110,11 @@ async fn handle_socket(state: Arc<AppState>, socket: WebSocket) -> Result<(), Er
                             continue;
                         };
                         if !is_subscribed(&state, connection_id, &channel_id) {
+                            dispatch_error_to_connection(
+                                &state,
+                                &connection_id,
+                                ERROR_NOT_SUBSCRIBED,
+                            );
                             debug!(
                                 ?connection_id,
                                 channel = %channel_id,
