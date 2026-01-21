@@ -1,4 +1,6 @@
 #!/usr/bin/env just --justfile
+set positional-arguments
+DATABASE_URL := "postgres://root:rootpass@localhost:5432/nebuladb"
 
 [group('LINT')]
 check:
@@ -23,3 +25,9 @@ git-fixup hash:
     git commit --fixup='{{ hash }}' && \
     git -c sequence.editor=: rebase -i --autosquash '{{ hash }}'^
 alias fixup := git-fixup
+
+[group('MIGRATE')]
+migrate-up:
+	DATABASE_URL={{DATABASE_URL}} sqlx migrate run
+migrate name:
+	DATABASE_URL={{DATABASE_URL}} sqlx migrate add {{name}}

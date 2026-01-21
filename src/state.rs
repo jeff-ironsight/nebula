@@ -12,6 +12,7 @@ pub struct Session {
 
 pub struct AppState {
     pub db: PgPool,
+    pub auth_secret: Vec<u8>,
     pub connections: DashMap<ConnectionId, OutboundTx>,
     pub auth_tokens: DashMap<Token, UserId>,
     pub sessions: DashMap<ConnectionId, Session>,
@@ -23,9 +24,10 @@ pub struct AppState {
 }
 
 impl AppState {
-    pub fn new(db: PgPool) -> Self {
+    pub fn new(db: PgPool, auth_secret: Vec<u8>) -> Self {
         Self {
             db,
+            auth_secret,
             connections: DashMap::new(),
             auth_tokens: DashMap::new(),
             sessions: DashMap::new(),
@@ -44,4 +46,12 @@ pub const TEST_DATABASE_URL: &str = "postgres://root:rootpass@localhost:5432/neb
 #[cfg(test)]
 pub fn test_db() -> PgPool {
     PgPool::connect_lazy(TEST_DATABASE_URL).expect("failed to init Postgres pool")
+}
+
+#[cfg(test)]
+pub const TEST_AUTH_SECRET: &str = "test-secret";
+
+#[cfg(test)]
+pub fn test_auth_secret() -> Vec<u8> {
+    TEST_AUTH_SECRET.as_bytes().to_vec()
 }
