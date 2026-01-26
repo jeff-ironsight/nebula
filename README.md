@@ -1,4 +1,6 @@
-# Nebula Gateway
+<img width="450" height="128" alt="nebula-named-900x512" src="https://github.com/user-attachments/assets/fd7410c7-322c-4ec2-a17b-563b58081cfe" />
+
+---
 
 A **Discord-inspired realtime chat gateway** built in **Rust** using **Axum**, **Tokio**, and **WebSockets**.
 
