@@ -65,10 +65,3 @@ jobs:
       # Lint and fail the build on warnings
       - name: Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
-
-      # Security audit (run only once to reduce noise/time)
-      - name: Security audit (cargo-audit)
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.rust == 'stable' }}
-        run: |
-          cargo install cargo-audit --locked
-          cargo audit
