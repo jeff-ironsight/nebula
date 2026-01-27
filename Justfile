@@ -9,38 +9,46 @@ COVERAGE_IGNORE_REGEX := env("COVERAGE_IGNORE_REGEX")
 
 [group('LINT')]
 check:
-    just migrate-up && cargo fmt --all && cargo clippy --all-targets --all-features --fix --allow-dirty && cargo audit && cargo test --all-features
+	just migrate-up && \
+	cargo fmt --all && \
+	cargo clippy --all-targets --all-features --fix --allow-dirty && \
+	cargo audit && \
+	cargo test --all-features
 lint:
-	just migrate-up && cargo fmt --all && cargo clippy --all-targets --all-features --fix --allow-dirty && cargo audit
+	just migrate-up && \
+	cargo fmt --all && \
+	cargo clippy --all-targets --all-features --fix --allow-dirty && \
+	cargo audit
 fmt:
-    cargo fmt --all && cargo clippy --all-targets --all-features --fix --allow-dirty
+	cargo fmt --all && \
+	cargo clippy --all-targets --all-features --fix --allow-dirty
 
 [group('SETUP')]
 dev:
-    rustup component add rustfmt clippy llvm-tools-preview
-    cargo install cargo-llvm-cov --locked
-    cargo install cargo-audit --locked
-    cargo install cargo-outdated --locked
-    cargo install cargo-nextest --locked
-    cargo install sqlx-cli --locked --no-default-features --features postgres
-    test -f .env || cp .env.example .env
+	rustup component add rustfmt clippy llvm-tools-preview
+	cargo install cargo-llvm-cov --locked
+	cargo install cargo-audit --locked
+	cargo install cargo-outdated --locked
+	cargo install cargo-nextest --locked
+	cargo install sqlx-cli --locked --no-default-features --features postgres
+	test -f .env || cp .env.example .env
 
 [group('TEST')]
 coverage:
-    just lint
-    cargo llvm-cov --workspace --all-features --ignore-filename-regex "{{ COVERAGE_IGNORE_REGEX }}"
+	just lint
+	cargo llvm-cov --workspace --all-features --ignore-filename-regex "{{ COVERAGE_IGNORE_REGEX }}"
 
 alias cov := coverage
 
 [group('BUILD')]
 release:
-    cargo build --release
+	cargo build --release
 
 debug:
-    RUST_LOG=debug cargo run
+	RUST_LOG=debug cargo run
 
 run:
-    cargo run
+	cargo run
 
 [group('DOCKER')]
 docker:
@@ -53,25 +61,25 @@ docker:
 
 [group('GIT')]
 git-force:
-    git push -f
+	git push -f
 
 alias yeet := git-force
 
 git-fixup hash:
-    git add --all && \
-    git commit --fixup='{{ hash }}' && \
-    git -c sequence.editor=: rebase -i --autosquash '{{ hash }}'^
+	git add --all && \
+	git commit --fixup='{{ hash }}' && \
+	git -c sequence.editor=: rebase -i --autosquash '{{ hash }}'^
 
 alias fixup := git-fixup
 
 [group('MIGRATE')]
 migrate-up:
-    DATABASE_URL={{ DATABASE_URL }} sqlx migrate run
+	DATABASE_URL={{ DATABASE_URL }} sqlx migrate run
 
 migrate name:
-    DATABASE_URL={{ DATABASE_URL }} sqlx migrate add {{ name }}
+	DATABASE_URL={{ DATABASE_URL }} sqlx migrate add {{ name }}
 
 prepare:
-    cargo sqlx prepare
+	cargo sqlx prepare
 
 migrate-prepare: migrate-up prepare
