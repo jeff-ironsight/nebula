@@ -21,7 +21,6 @@
     <img src="https://img.shields.io/badge/MSRV-1.93-blue" alt="MSRV" />
   </a>
   &nbsp;
-  <img src="https://visitorbadge.vercel.app//api/badge/80baad95-c492-47e4-bc8f-4abe518240e0?style=flat&color=98ccff&labelColor=5b5b5b" alt="Visits" />
   <a href="https://github.com/jeff-ironsight/nebula-gateway/actions/workflows/ci.yml">
     <img src="https://github.com/jeff-ironsight/nebula-gateway/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI" />
   </a>
@@ -48,3 +47,8 @@ Nebula focuses on a clean, idiomatic Rust implementation of a gateway layer:
 
 This project is intentionally **backend-first** and designed as a learning and experimentation ground for building
 large-scale realtime systems in Rust.
+
+#### Reports:
+
+- Benchmarks: https://jeff-ironsight.github.io/nebula-gateway/bench/
+- Coverage: https://jeff-ironsight.github.io/nebula-gateway/coverage/
