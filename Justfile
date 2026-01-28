@@ -13,7 +13,7 @@ check:
 	cargo fmt --all && \
 	cargo clippy --all-targets --all-features --fix --allow-dirty && \
 	cargo audit && \
-	cargo test --all-features
+	cargo test --all-features --lib
 lint:
 	just migrate-up && \
 	cargo fmt --all && \
@@ -31,6 +31,7 @@ dev:
 	cargo install cargo-outdated --locked
 	cargo install cargo-nextest --locked
 	cargo install sqlx-cli --locked --no-default-features --features postgres
+	brew install gnuplot
 	test -f .env || cp .env.example .env
 
 [group('TEST')]
@@ -39,6 +40,10 @@ coverage:
 	cargo llvm-cov --workspace --all-features --ignore-filename-regex "{{ COVERAGE_IGNORE_REGEX }}"
 
 alias cov := coverage
+
+[group('TEST')]
+bench:
+	cargo bench --bench gateway -- --noise-threshold 0.05
 
 [group('BUILD')]
 release:
