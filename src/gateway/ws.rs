@@ -349,6 +349,60 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn broadcast_removes_closed_senders() {
+        let state = Arc::new(AppState::new(test_db().await, None));
+        let channel_id = ChannelId::from("general");
+        let closed_connection = ConnectionId::from(Uuid::new_v4());
+        let active_connection = ConnectionId::from(Uuid::new_v4());
+        let active_user_id = UserId::from(Uuid::new_v4());
+
+        {
+            let members = state.channel_members.entry(channel_id.clone()).or_default();
+            members.insert(closed_connection);
+            members.insert(active_connection);
+        }
+        state
+            .connection_channels
+            .entry(closed_connection)
+            .or_default()
+            .insert(channel_id.clone());
+        state
+            .connection_channels
+            .entry(active_connection)
+            .or_default()
+            .insert(channel_id.clone());
+
+        let (closed_tx, closed_rx) = mpsc::unbounded_channel();
+        drop(closed_rx);
+        state.connections.insert(closed_connection, closed_tx);
+
+        let (active_tx, mut active_rx) = mpsc::unbounded_channel();
+        state.connections.insert(active_connection, active_tx);
+
+        broadcast_message_to_channel(&state, &channel_id, &active_user_id, "hello");
+
+        let message = active_rx.recv().await.unwrap();
+        match message {
+            Message::Text(text) => {
+                let payload: GatewayPayload = from_str(text.as_ref()).unwrap();
+                assert!(matches!(
+                    payload,
+                    GatewayPayload::Dispatch { t, .. } if t == "MESSAGE_CREATE"
+                ));
+            }
+            other => panic!("expected text message, got {:?}", other),
+        }
+
+        let members = state.channel_members.get(&channel_id).unwrap();
+        assert_eq!(members.len(), 1);
+        assert!(members.iter().any(|id| *id == active_connection));
+        drop(members);
+
+        assert!(state.connection_channels.get(&closed_connection).is_none());
+        assert!(state.connection_channels.get(&active_connection).is_some());
+    }
+
+    #[tokio::test]
     async fn cleanup_connection_removes_all_channels() {
         let state = Arc::new(AppState::new(test_db().await, None));
         let connection_id = ConnectionId::from(Uuid::new_v4());

@@ -74,6 +74,7 @@ pub fn broadcast_message_to_channel(
                         channel = %channel_id,
                         "failed to send message payload"
                     );
+                    stale_members.push(member_id);
                 }
             }
             None => {
